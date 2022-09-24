@@ -5,3 +5,7 @@ export const defaultTransition = {
   duration: 1.25,
   ease: [0.43, 0.13, 0.23, 0.96],
 }
+export const hoverTransition = {
+  duration: 0.5,
+  ease: 'easeOut',
+}

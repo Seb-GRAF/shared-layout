@@ -4,7 +4,7 @@ import Link from 'next/link'
 const HomeButton = (): JSX.Element => {
   return (
     <Link passHref href='/'>
-      <a className='absolute top-4 left-4 p-1.5 border-black border-2 bg-white hover:bg-black'>
+      <a className='fixed top-4 left-4 p-1.5 border-black border-2 bg-white hover:bg-black hover:text-white transition-all'>
         <svg
           xmlns='http://www.w3.org/2000/svg'
           fill='none'

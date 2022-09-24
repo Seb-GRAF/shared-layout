@@ -1,6 +1,6 @@
 import React from 'react'
 import { AnimationControls, motion, Variants } from 'framer-motion'
-import { defaultTransition } from '../../utils/transition'
+import { defaultTransition } from '../../utils/transitions'
 
 interface Props {
   title: string
@@ -15,17 +15,14 @@ const variants: Variants = {
   animate: {
     y: 0,
     opacity: 1,
-    transition: {
-      delay: 0.5,
-      duration: 1,
-    },
+    transition: defaultTransition,
   },
 }
 
 const Loader = ({ title, loaderControls }: Props) => {
   return (
     <motion.div
-      className='fixed inset-0 bg-black z-50 text-white text-5xl tracking-widest capitalize flex items-center justify-center font-bold pointer-events-none'
+      className='fixed inset-0 bg-black z-50 text-white text-5xl tracking-widest capitalize flex items-center justify-center font-bold select-none'
       animate={loaderControls}>
       <motion.h1
         variants={variants}

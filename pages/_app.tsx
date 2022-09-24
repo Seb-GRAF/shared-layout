@@ -1,11 +1,15 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { PageLoadProvider } from '../contexts/PageLoadProvider'
+import { AnimatePresence } from 'framer-motion'
+import PageTransition from '../components/PageTransition'
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <PageLoadProvider>
-      <Component {...pageProps} />
+      <PageTransition>
+        <Component {...pageProps} />
+      </PageTransition>
     </PageLoadProvider>
   )
 }

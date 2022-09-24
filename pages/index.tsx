@@ -1,12 +1,18 @@
 import type { NextPage } from 'next'
 import { useState, useRef, useEffect, useContext } from 'react'
-import { useAnimation, motion, useMotionValue, useSpring } from 'framer-motion'
+import {
+  useAnimation,
+  motion,
+  useMotionValue,
+  useSpring,
+  PanInfo,
+} from 'framer-motion'
 import ImageLink from '../components/ImageLink'
 import data from '../utils/data.json'
 import Header from '../components/Header/Header'
 import useWindowSize from '../hooks/useWindowSize'
 import Loader from '../components/Loader'
-import { defaultTransition } from '../utils/transition'
+import { defaultTransition, hoverTransition } from '../utils/transitions'
 import { PageLoadContext } from '../contexts/PageLoadProvider'
 
 export type DataType = {
@@ -18,28 +24,13 @@ export type DataType = {
 
 const gridColumnsAnimationOffset = [800, 400, 600, 800, 600]
 
-const imageVariants = {
-  initial: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.1,
-    transition: {
-      delay: 0.5,
-      duration: 0.75,
-    },
-  },
-  tap: {
-    scale: 1.1,
-  },
-}
-
 const Home: NextPage = () => {
   const firstLoad = useContext(PageLoadContext)
 
   const [isGrid, setIsGrid] = useState(true)
   const [hoveredCityName, setHoveredCityName] = useState('')
   const [mouseMoveAllowed, setMouseMoveAllowed] = useState(false)
+  const [animationsDisabled, setAnimationsDisabled] = useState(false)
   const window = useWindowSize()
 
   const loaderControls = useAnimation()
@@ -55,8 +46,8 @@ const Home: NextPage = () => {
 
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const xMotion = useSpring(x, { stiffness: 300, damping: 100 })
-  const yMotion = useSpring(y, { stiffness: 300, damping: 100 })
+  const xMotion = useSpring(x, { stiffness: 400, damping: 80 })
+  const yMotion = useSpring(y, { stiffness: 400, damping: 80 })
 
   // sets VH to true 100vh
   useEffect(() => {
@@ -73,11 +64,12 @@ const Home: NextPage = () => {
     if (gridWrapperRef.current) {
       gridWrapperRef.current.style.height = `${window.height}px`
     }
-  }, [window.height, gridWrapperRef.current])
+  }, [window.height, window.width, gridWrapperRef.current])
 
   // sequence for loader and grid animation
   useEffect(() => {
-    async function sequence() {
+    async function animationSequence() {
+      console.log(firstLoad?.firstLoad)
       if (firstLoad?.firstLoad) {
         gridControls.set((index: number) => ({
           y: gridColumnsAnimationOffset[index % 5],
@@ -97,9 +89,14 @@ const Home: NextPage = () => {
           pointerEvents: 'auto',
           transition: defaultTransition,
         }))
-
         setIsGrid(false)
-        firstLoad?.handleFirstLoad(false)
+        firstLoad.handleFirstLoad(false)
+        loaderControls.start({
+          pointerEvents: 'none',
+        })
+        setTimeout(() => {
+          setMouseMoveAllowed(true)
+        }, 800)
       }
     }
 
@@ -107,16 +104,16 @@ const Home: NextPage = () => {
       loaderControls.start({
         opacity: 0,
         transition: defaultTransition,
+        pointerEvents: 'none',
       })
-
       bgColor.set('white')
-
-      sequence()
-    }, 2000)
+      animationSequence()
+    }, 1000)
   }, [])
 
   // enables / disables grid move on grid toggle
   useEffect(() => {
+    handleImageLeave()
     if (isGrid) {
       if (gridRef.current && window.width && window.height) {
         const { width, height } = gridRef.current.getBoundingClientRect()
@@ -127,20 +124,20 @@ const Home: NextPage = () => {
         x.set(xBounds)
         y.set(yBounds)
       }
-      setTimeout(() => {
-        setMouseMoveAllowed(true)
-      }, 1500)
     } else {
-      setMouseMoveAllowed(false)
       x.set(0)
       y.set(0)
+    }
+    if (!firstLoad?.firstLoad) {
+      setMouseMoveAllowed(false)
+      setTimeout(() => {
+        setMouseMoveAllowed(true)
+      }, 500)
     }
   }, [isGrid])
 
   const handleGridParallax = (
-    event:
-      | React.MouseEvent<HTMLDivElement>
-      | React.TouchEvent['changedTouches'][0]
+    event: React.MouseEvent<HTMLDivElement>
   ): void => {
     if (!mouseMoveAllowed) return
 
@@ -155,30 +152,45 @@ const Home: NextPage = () => {
       y.set((window.height - height) * offsetY)
     }
   }
-  const handleImageEnter = async (
-    color: string,
-    title: string
-  ): Promise<any> => {
-    setHoveredCityName(title)
+  const handleGridParallaxOnTouch = (
+    event: MouseEvent | TouchEvent,
+    info: PanInfo
+  ): void => {
+    if (!mouseMoveAllowed) return
 
+    if (gridRef.current && window.width && window.height) {
+      const { width, height } = gridRef.current.getBoundingClientRect()
+
+      // x and y cursor position (value from 0 to 1)
+      const offsetX = info.point.x / window.width
+      const offsetY = info.point.y / window.height
+
+      x.set((window.width - width) * offsetX)
+      y.set((window.height - height) * offsetY)
+    }
+  }
+  const handleImageEnter = (color: string, title: string): void => {
+    if (!mouseMoveAllowed || animationsDisabled) return
+    setHoveredCityName(title)
     bgColor.set(color)
+
     tooltipControls.start({
-      y: 0,
-      transition: { duration: 0.75, delay: 0.5 },
+      opacity: 1,
+      transition: hoverTransition,
     })
     tooltipControls.start({
       backgroundColor: color,
-      transition: { duration: 0.5 },
+      transition: hoverTransition,
     })
   }
   const handleImageLeave = (): void => {
     bgColor.set('#fff')
     tooltipControls.start({
-      y: 150,
-      transition: { duration: 0.25 },
+      opacity: 0,
+      transition: hoverTransition,
     })
   }
-  const handleGalleryScroll = (
+  const handleGalleryHorizontalScroll = (
     event: React.WheelEvent<HTMLDivElement>
   ): void => {
     if (event.deltaY > 0) event.currentTarget.scrollLeft += 100
@@ -194,18 +206,16 @@ const Home: NextPage = () => {
         className='relative w-screen overflow-hidden transition-all ease-[cubic-bezier(0.075,0.82,0.165,1)]'
         style={{
           backgroundColor: bgColor,
-          transition: 'background-color 0.75s ease-in-out 500ms',
+          transition: 'background-color 0.5s ease-in-out',
         }}>
         {/* GRID GALLERY */}
         {isGrid && (
           <div className='absolute w-fit h-fit overflow-hidden'>
             <motion.div
-              className='relative touch-none grid grid-cols-[repeat(5,15rem)] lg:grid-cols-[repeat(5,20rem)] xl:grid-cols-[repeat(5,25vw)]  p-12'
+              className='relative touch-none grid grid-cols-[repeat(5,17rem)] lg:grid-cols-[repeat(5,22rem)] xl:grid-cols-[repeat(5,25vw)]  p-12'
               onMouseMove={handleGridParallax}
-              onTouchMove={(e) => {
-                console.log(e)
-
-                handleGridParallax(e.changedTouches[0])
+              onPan={(e, panInfo) => {
+                handleGridParallaxOnTouch(e, panInfo)
               }}
               ref={gridRef}
               transition={defaultTransition}
@@ -216,28 +226,18 @@ const Home: NextPage = () => {
               {mapData.map((element, index) => (
                 <motion.div
                   key={`element-${index}`}
-                  className='h-72 lg:h-96 xl:h-[35vw] touch-auto'
+                  className='touch-auto flex items-center justify-center h-[17rem] w-[17rem] lg:w-[22rem] lg:h-[22rem] xl:w-[25vw] xl:h-[25vw] p-4 lg:p-8 xl:p-[2vw]'
                   animate={gridControls}
                   custom={index}>
-                  <div className='px-8'>
-                    <motion.div
-                      className='relative w-full min-h-[18rem] flex items-center justify-center'
-                      variants={imageVariants}
-                      initial='initial'
-                      whileHover='hover'
-                      whileTap='tap'
-                      transition={defaultTransition}
-                      onTapStart={() =>
-                        handleImageEnter(element.color, element.title)
-                      }
-                      onTapCancel={() => handleImageLeave()}
-                      onMouseEnter={() =>
-                        handleImageEnter(element.color, element.title)
-                      }
-                      onMouseLeave={() => handleImageLeave()}>
-                      <ImageLink element={element} index={index} />
-                    </motion.div>
-                  </div>
+                  <motion.div className='flex items-center justify-center h-full w-full'>
+                    <ImageLink
+                      element={element}
+                      index={index}
+                      mouseMoveAllowed={mouseMoveAllowed}
+                      handleImageEnter={handleImageEnter}
+                      handleImageLeave={handleImageLeave}
+                    />
+                  </motion.div>
                 </motion.div>
               ))}
             </motion.div>
@@ -247,8 +247,8 @@ const Home: NextPage = () => {
         {/* HORIZONTAL GALLERY */}
         {!isGrid && (
           <div
-            className='overflow-x-scroll h-full grid grid-cols-[repeat(20,1fr)] items-center px-24'
-            onWheel={handleGalleryScroll}
+            className='overflow-x-scroll h-full grid grid-cols-[repeat(20,1fr)] items-center px-8 lg:px-24'
+            onWheel={handleGalleryHorizontalScroll}
             ref={galleryRef}>
             {mapData.map((element, index) => (
               <div key={`element-${index}`} className='relative'>
@@ -258,7 +258,24 @@ const Home: NextPage = () => {
                     handleImageEnter(element.color, element.title)
                   }
                   onMouseLeave={() => handleImageLeave()}>
-                  <ImageLink element={element} index={index} />
+                  <ImageLink
+                    element={element}
+                    index={index}
+                    mouseMoveAllowed={mouseMoveAllowed}
+                    handleImageEnter={handleImageEnter}
+                    handleImageLeave={handleImageLeave}
+                    customVariants={{
+                      initial: {
+                        scale: 1,
+                      },
+                      hover: {
+                        scale: 1,
+                      },
+                      tap: {
+                        scale: 1,
+                      },
+                    }}
+                  />
                 </div>
               </div>
             ))}
@@ -268,8 +285,8 @@ const Home: NextPage = () => {
         {/* TOOLTIP */}
         <motion.div
           animate={tooltipControls}
-          className='bg-red-200 w-96 py-8 absolute bottom-4 left-[calc(50%-12rem)]  flex items-center justify-center border-2 border-black'>
-          <h2 className='text-3xl font-bold'>{hoveredCityName}</h2>
+          className='bg-red-200 w-64 py-4 sm:py-6 absolute bottom-6 opacity-0 left-[calc(50%-8rem)]  hidden items-center justify-center border-2 border-black pointer-events-none sm:flex'>
+          <h2 className='text-2xl font-bold'>{hoveredCityName}</h2>
         </motion.div>
       </motion.div>
     </>

@@ -3,7 +3,7 @@ import Image from 'next/image'
 import HomeButton from '../components/HomeButton/HomeButton'
 import Loader from '../components/Loader'
 import useWindowSize from '../hooks/useWindowSize'
-import { defaultTransition } from '../utils/transition'
+import { defaultTransition, defaultEase } from '../utils/transitions'
 import { motion, Variants, useAnimation } from 'framer-motion'
 import type { DataType } from '.'
 import data from '../utils/data.json'
@@ -34,9 +34,10 @@ const City = ({ city }: Props) => {
     setTimeout(() => {
       loaderControls.start({
         opacity: 0,
+        pointerEvents: 'none',
         transition: defaultTransition,
       })
-    }, 2000)
+    }, 1000)
   }, [])
 
   useEffect(() => {
@@ -49,23 +50,61 @@ const City = ({ city }: Props) => {
     <>
       <Loader title={city.title} loaderControls={loaderControls} />
       <HomeButton />
-      <div className='model-container m-4 h-full' ref={pageRef}>
-        <div className='image-wrapper h-full w-screen flex items-center justify-center'>
+      <motion.div
+        className='mx-auto model-container px-8 max-w-6xl h-full'
+        ref={pageRef}>
+        <div className='image-wrapper w-full flex flex-col gap-12 items-center pt-20 pb-24'>
           <motion.div
             variants={variants}
             initial={'initial'}
             animate={'animate'}
-            transition={{ defaultTransition, delay: 2 }}
-            className='relative w-[80vw] min-h-[60vh] aspect-video'>
+            transition={{ delay: 1.2, duration: 1, ease: defaultEase }}
+            className='relative min-w-full aspect-video'>
             <Image
               src={city.href}
               alt={city.title}
               layout='fill'
               objectFit='cover'
+              priority={true}
             />
           </motion.div>
+          {[1, 2, 3, 4].map((paragraph, index) => (
+            <motion.p
+              key={`paragraph-${index}`}
+              variants={variants}
+              initial={'initial'}
+              whileInView={'animate'}
+              transition={{
+                duration: 1,
+                ease: defaultEase,
+              }}>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab
+              quibusdam similique qui esse id minima ducimus voluptate eum
+              officia laudantium deleniti est molestias, fugit dolores obcaecati
+              odit omnis quaerat dolorum error nisi libero doloremque, rerum
+              aspernatur! Quidem in quod eligendi iure, quo hic, necessitatibus
+              ut cum omnis quibusdam a, ea sed reiciendis possimus mollitia
+              laboriosam repellendus modi magni eveniet voluptate reprehenderit
+              eum amet deserunt labore. Iste non necessitatibus reiciendis,
+              excepturi alias ad magni tenetur explicabo doloribus id nobis
+              soluta expedita impedit, dolores praesentium tempora voluptas!
+              Soluta ipsa magnam modi illum consequuntur enim, ipsum laborum
+              aut. Vitae dolorem omnis doloremque iste animi. Dolor, hic in nam
+              dolorem corrupti mollitia quibusdam suscipit! Nisi aperiam animi
+              libero optio architecto aspernatur nihil ullam doloribus? At
+              eligendi fugit cupiditate soluta iste ut esse eaque quas sit,
+              maiores dolor illum necessitatibus omnis tempora. Sed doloremque
+              fugit eaque quos odit ea qui, nisi atque beatae eius ab officiis.
+              Saepe nemo, aliquid similique, deleniti perferendis dolorum
+              necessitatibus tempora vel eius harum debitis dolorem beatae
+              pariatur. Enim reprehenderit similique dolore quaerat quidem
+              aperiam? Unde debitis suscipit, mollitia, adipisci earum fuga
+              recusandae officiis maxime nostrum rem hic amet! Veritatis sit
+              eligendi officiis dolorem quidem facilis a ut? Eos, vel est!
+            </motion.p>
+          ))}
         </div>
-      </div>
+      </motion.div>
     </>
   )
 }
