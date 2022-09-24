@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface Props {
   toggleView: (view: boolean) => void
   view: boolean
@@ -7,7 +5,7 @@ interface Props {
 
 const Header = ({ view, toggleView }: Props) => {
   return (
-    <header className='fixed flex items-center right-4 top-4 z-50'>
+    <header className='fixed flex items-center right-4 top-4 z-40'>
       <button
         onClick={() => toggleView(!view)}
         className='p-1.5 border-black border-2 bg-white hover:bg-black hover:text-white transition-all'>

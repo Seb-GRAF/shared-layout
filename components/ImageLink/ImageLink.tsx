@@ -18,12 +18,10 @@ const ImageLink = ({ element, index }: Props): JSX.Element => {
         <motion.img
           src={element.href}
           alt={element.title}
+          draggable={false}
           layoutId={`container-${index}`}
           transition={defaultTransition}
-          // className={tailwindStyles}
-          // layout='fill'
-          // objectFit='contain'
-        ></motion.img>
+        />
       </a>
     </Link>
   )
