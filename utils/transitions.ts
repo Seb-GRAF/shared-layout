@@ -7,5 +7,4 @@ export const defaultTransition = {
 }
 export const hoverTransition = {
   duration: 0.5,
-  ease: 'easeOut',
 }

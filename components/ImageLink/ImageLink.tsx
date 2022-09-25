@@ -51,8 +51,8 @@ const ImageLink = ({
           transition={defaultTransition}
           onTapStart={() => handleImageEnter(element.color, element.title)}
           onTapCancel={() => handleImageLeave()}
-          onMouseOver={() => handleImageEnter(element.color, element.title)}
-          onMouseLeave={() => handleImageLeave()}
+          onHoverStart={() => handleImageEnter(element.color, element.title)}
+          onHoverEnd={() => handleImageLeave()}
         />
       </a>
     </Link>

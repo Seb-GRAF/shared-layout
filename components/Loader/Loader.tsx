@@ -22,9 +22,10 @@ const variants: Variants = {
 const Loader = ({ title, loaderControls }: Props) => {
   return (
     <motion.div
-      className='fixed inset-0 bg-black z-50 text-white text-5xl tracking-widest capitalize flex items-center justify-center font-bold select-none'
+      className='fixed inset-0 bg-black z-50 flex items-center justify-center font-bold select-none'
       animate={loaderControls}>
       <motion.h1
+        className='text-center text-white text-5xl tracking-widest capitalize'
         variants={variants}
         initial='initial'
         animate='animate'

@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react'
 import Image from 'next/image'
 import HomeButton from '../components/HomeButton/HomeButton'
 import Loader from '../components/Loader'
-import useWindowSize from '../hooks/useWindowSize'
 import { defaultTransition, defaultEase } from '../utils/transitions'
 import { motion, Variants, useAnimation } from 'framer-motion'
 import type { DataType } from '.'
@@ -15,6 +14,14 @@ interface Props {
 const variants: Variants = {
   initial: {
     opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+  },
+}
+const imageVariants: Variants = {
+  initial: {
+    opacity: 0,
     y: 100,
   },
   animate: {
@@ -24,7 +31,6 @@ const variants: Variants = {
 }
 
 const City = ({ city }: Props) => {
-  const { height } = useWindowSize()
   const pageRef = useRef<HTMLDivElement>(null)
 
   const loaderControls = useAnimation()
@@ -37,28 +43,20 @@ const City = ({ city }: Props) => {
         pointerEvents: 'none',
         transition: defaultTransition,
       })
-    }, 1000)
+    }, 1400)
   }, [])
-
-  useEffect(() => {
-    if (pageRef.current) {
-      pageRef.current.style.height = `${height}px`
-    }
-  }, [height])
 
   return (
     <>
       <Loader title={city.title} loaderControls={loaderControls} />
       <HomeButton />
-      <motion.div
-        className='mx-auto model-container px-8 max-w-6xl h-full'
-        ref={pageRef}>
-        <div className='image-wrapper w-full flex flex-col gap-12 items-center pt-20 pb-24'>
+      <motion.div className='bg-white model-container px-8 ' ref={pageRef}>
+        <div className='max-w-6xl mx-auto image-wrapper w-full  flex flex-col gap-12 items-center pt-20 pb-24'>
           <motion.div
-            variants={variants}
+            variants={imageVariants}
             initial={'initial'}
             animate={'animate'}
-            transition={{ delay: 1.2, duration: 1, ease: defaultEase }}
+            transition={{ delay: 1.5, duration: 1, ease: defaultEase }}
             className='relative min-w-full aspect-video'>
             <Image
               src={city.href}

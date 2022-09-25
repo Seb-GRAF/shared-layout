@@ -69,7 +69,6 @@ const Home: NextPage = () => {
   // sequence for loader and grid animation
   useEffect(() => {
     async function animationSequence() {
-      console.log(firstLoad?.firstLoad)
       if (firstLoad?.firstLoad) {
         gridControls.set((index: number) => ({
           y: gridColumnsAnimationOffset[index % 5],
@@ -108,7 +107,7 @@ const Home: NextPage = () => {
       })
       bgColor.set('white')
       animationSequence()
-    }, 1000)
+    }, 1400)
   }, [])
 
   // enables / disables grid move on grid toggle
@@ -196,9 +195,15 @@ const Home: NextPage = () => {
     if (event.deltaY > 0) event.currentTarget.scrollLeft += 100
     if (event.deltaY < 0) event.currentTarget.scrollLeft -= 100
   }
+  const horizontalGalleryVariants = {
+    inView: ({ color, title }: { color: string; title: string }) => {
+      bgColor.set(color)
+      return {}
+    },
+  }
 
   return (
-    <>
+    <div className='bg-black'>
       <Loader title={'Cities'} loaderControls={loaderControls} />
       <Header view={isGrid} toggleView={(value) => setIsGrid(value)} />
       <motion.div
@@ -252,8 +257,11 @@ const Home: NextPage = () => {
             ref={galleryRef}>
             {mapData.map((element, index) => (
               <div key={`element-${index}`} className='relative'>
-                <div
+                <motion.div
                   className='relative w-[70vmin] h-[70vmin] mx-[5vw] flex items-center justify-center'
+                  custom={element}
+                  variants={horizontalGalleryVariants}
+                  whileInView={'inView'}
                   onMouseEnter={() =>
                     handleImageEnter(element.color, element.title)
                   }
@@ -262,8 +270,8 @@ const Home: NextPage = () => {
                     element={element}
                     index={index}
                     mouseMoveAllowed={mouseMoveAllowed}
-                    handleImageEnter={handleImageEnter}
-                    handleImageLeave={handleImageLeave}
+                    handleImageEnter={() => null}
+                    handleImageLeave={() => null}
                     customVariants={{
                       initial: {
                         scale: 1,
@@ -276,7 +284,7 @@ const Home: NextPage = () => {
                       },
                     }}
                   />
-                </div>
+                </motion.div>
               </div>
             ))}
           </div>
@@ -289,7 +297,7 @@ const Home: NextPage = () => {
           <h2 className='text-2xl font-bold'>{hoveredCityName}</h2>
         </motion.div>
       </motion.div>
-    </>
+    </div>
   )
 }
 
