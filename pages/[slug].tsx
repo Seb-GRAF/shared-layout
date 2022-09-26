@@ -72,6 +72,7 @@ const City = ({ city }: Props) => {
               variants={variants}
               initial={'initial'}
               whileInView={'animate'}
+              viewport={{ once: true }}
               transition={{
                 duration: 1,
                 ease: defaultEase,

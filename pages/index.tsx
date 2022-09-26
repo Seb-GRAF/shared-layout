@@ -197,7 +197,7 @@ const Home: NextPage = () => {
   }
   const horizontalGalleryVariants = {
     inView: ({ color, title }: { color: string; title: string }) => {
-      bgColor.set(color)
+      handleImageEnter(color, title)
       return {}
     },
   }
@@ -262,10 +262,7 @@ const Home: NextPage = () => {
                   custom={element}
                   variants={horizontalGalleryVariants}
                   whileInView={'inView'}
-                  onMouseEnter={() =>
-                    handleImageEnter(element.color, element.title)
-                  }
-                  onMouseLeave={() => handleImageLeave()}>
+                  viewport={{ amount: 1 }}>
                   <ImageLink
                     element={element}
                     index={index}
@@ -293,7 +290,9 @@ const Home: NextPage = () => {
         {/* TOOLTIP */}
         <motion.div
           animate={tooltipControls}
-          className='bg-red-200 w-64 py-4 sm:py-6 absolute bottom-6 opacity-0 left-[calc(50%-8rem)]  hidden items-center justify-center border-2 border-black pointer-events-none sm:flex'>
+          className={`bg-red-200 w-64 py-4 sm:py-6 absolute bottom-6 opacity-0 left-[calc(50%-8rem)]  ${
+            isGrid ? 'hidden' : 'flex'
+          } items-center justify-center border-2 border-black pointer-events-none sm:flex`}>
           <h2 className='text-2xl font-bold'>{hoveredCityName}</h2>
         </motion.div>
       </motion.div>
